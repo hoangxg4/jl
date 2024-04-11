@@ -1,7 +1,10 @@
 # Sử dụng hình ảnh cơ sở Ubuntu
 FROM ubuntu:latest
 
-# Cài đặt sudo và các gói cần thiết
+# Thêm cấu hình để vô hiệu hóa cờ "no new privileges"
+RUN echo 'kernel.unprivileged_userns_clone=1' > /etc/sysctl.d/00-local-userns.conf
+
+# Cập nhật hệ thống và cài đặt các gói cần thiết
 RUN apt-get update && \
     apt-get install -y sudo python3-pip && \
     pip3 install jupyterlab
