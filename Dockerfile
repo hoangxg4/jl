@@ -10,5 +10,9 @@ RUN apt-get update && \
 WORKDIR /workspace
 ENV PATH="/root/.local/bin:${PATH}"
 
-# Chạy Jupyter
+# Đặt mật khẩu cho Jupyter Lab
+ENV JUPYTER_LAB_PASSWORD=11042006
+RUN jupyter lab password ${JUPYTER_LAB_PASSWORD}
+
+# Chạy Jupyter Lab
 CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
