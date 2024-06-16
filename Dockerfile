@@ -14,7 +14,5 @@ RUN mkdir -p ~/.jupyter && \
 # Mở cổng 8888
 EXPOSE 8888
 
-USER root
-
 # Lệnh chạy JupyterLab khi container khởi động
 CMD ["jupyter", "lab", "--allow-root"]
