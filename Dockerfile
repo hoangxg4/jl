@@ -3,8 +3,6 @@ FROM ubuntu:latest
 
 # Cài đặt các gói cần thiết
 RUN apt-get update && \
-    apt-get upgrade && \
-    apt-set install sudo && \
     apt-get install -y python3-pip && \
     pip3 install jupyterlab
 
