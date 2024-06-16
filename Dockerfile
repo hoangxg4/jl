@@ -1,18 +1,16 @@
-FROM python:3.9-slim
+# Sử dụng hình ảnh cơ sở Ubuntu
+FROM ubuntu:latest
 
-ENV PYTHONUNBUFFERED=1
-
+# Cài đặt các gói cần thiết
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    build-essential \
-    && pip install --no-cache-dir jupyter
+    apt-get upgrade && \
+    apt-set install sudo && \
+    apt-get install -y python3-pip && \
+    pip3 install jupyterlab
 
+# Tạo một thư mục làm thư mục làm việc và thiết lập môi trường cho Jupyter
 WORKDIR /workspace
+ENV PATH="/root/.local/bin:${PATH}"
 
-# Tạo tệp cấu hình Jupyter và vô hiệu hóa đăng nhập
-RUN jupyter notebook --generate-config
-RUN echo "c.NotebookApp.token = ''" >> ~/.jupyter/jupyter_notebook_config.py
-
-EXPOSE 8888
-
-CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+# Chạy Jupyter
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=''"]
