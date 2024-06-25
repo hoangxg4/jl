@@ -1,31 +1,35 @@
-# Sử dụng image Python làm base
-FROM python:3.9-slim-buster
+FROM python:3.10-slim-buster
 
 # Cài đặt các gói cần thiết
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
+    sudo \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
 
-# Cài đặt Jupyter Notebook và các extensions phổ biến
+# Tạo người dùng jupyter và đặt mật khẩu (thay 'your_password' bằng mật khẩu mạnh)
+RUN useradd -m -s /bin/bash jupyter \
+    && echo "jupyter:11042006" | chpasswd
+
+# Thiết lập thư mục làm việc và quyền sở hữu
+WORKDIR /home/jupyter
+
+# Cài đặt JupyterLab
 RUN pip install --upgrade pip \
-    && pip install jupyter notebook jupyterlab \
-    && pip install ipywidgets
+    && pip install jupyterlab
 
-# Tạo thư mục làm việc
-WORKDIR /workspace
+# Cấu hình JupyterLab
+COPY jupyter_lab_config.py /home/jupyter/.jupyter/jupyter_lab_config.py
 
-# Cấu hình Jupyter Notebook
-RUN mkdir /root/.jupyter \
-    && echo "c.NotebookApp.token = '11042006'" >> /root/.jupyter/jupyter_notebook_config.py \
-    && echo "c.NotebookApp.password = ''" >> /root/.jupyter/jupyter_notebook_config.py \
-    && echo "c.NotebookApp.ip = '0.0.0.0'" >> /root/.jupyter/jupyter_notebook_config.py \
-    && echo "c.NotebookApp.port = 8888" >> /root/.jupyter/jupyter_notebook_config.py \
-    && echo "c.NotebookApp.open_browser = False" >> /root/.jupyter/jupyter_notebook_config.py \
-    && echo "c.NotebookApp.allow_root = True" >> /root/.jupyter/jupyter_notebook_config.py
+# Sao chép script khởi động
+COPY start.sh /home/jupyter/start.sh
+RUN chmod +x /home/jupyter/start.sh
 
-# Port Jupyter Notebook sẽ sử dụng
+# Cấu hình Jupyter Notebook để cho phép truy cập từ xa
+ENV JUPYTER_ENABLE_LAB=yes
+
+# Cổng Jupyter Notebook
 EXPOSE 8888
 
-# Khởi động Jupyter Notebook khi container chạy
-CMD ["jupyter", "notebook", "--allow-root"]
+# Chạy JupyterLab khi container khởi động, bắt đầu với người dùng 'jupyter'
+USER jupyter
+CMD ["/home/jupyter/start.sh"]
