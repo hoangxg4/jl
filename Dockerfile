@@ -17,7 +17,7 @@ WORKDIR /workspace
 
 # Cấu hình Jupyter Notebook
 RUN mkdir /root/.jupyter \
-    && echo "c.NotebookApp.token = ''" >> /root/.jupyter/jupyter_notebook_config.py \
+    && echo "c.NotebookApp.token = '11042006'" >> /root/.jupyter/jupyter_notebook_config.py \
     && echo "c.NotebookApp.password = ''" >> /root/.jupyter/jupyter_notebook_config.py \
     && echo "c.NotebookApp.ip = '0.0.0.0'" >> /root/.jupyter/jupyter_notebook_config.py \
     && echo "c.NotebookApp.port = 8888" >> /root/.jupyter/jupyter_notebook_config.py \
