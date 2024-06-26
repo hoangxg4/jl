@@ -1,35 +1,37 @@
-# Use the official Ubuntu base image
-FROM ubuntu:20.04
+FROM jupyter/base-notebook
 
-# Set environment variables
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install necessary packages
-RUN apt-get update && \
-    apt-get install -y python3-pip sudo && \
-    rm -rf /var/lib/apt/lists/*
-
-# Create a non-root user and add to sudo group
-RUN useradd -m -s /bin/bash jupyter && \
-    echo 'jupyter ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-
-# Set the default user to root
+# Cài đặt các gói cần thiết
 USER root
+RUN apt-get update && apt-get install -y \
+    sudo \
+    vim \
+    nano
 
-# Install Jupyter
-RUN pip3 install jupyter
+# Tạo người dùng mới
+ARG NB_USER=jovyan
+ARG NB_UID=1000
+ENV USER ${NB_USER}
+ENV NB_GID ${NB_UID}
+ENV HOME /home/${NB_USER}
 
-# Copy Jupyter config file if needed
-# COPY jupyter_notebook_config.py /home/jupyter/.jupyter/
+RUN useradd -m -s /bin/bash -N -u ${NB_UID} ${NB_USER}
 
-# Expose the port for Jupyter Notebook
-EXPOSE 8888
+# Thiết lập mật khẩu (lưu ý thay đổi 'yourpassword' bằng mật khẩu mạnh)
+RUN echo "${NB_USER}:yourpassword" | chpasswd
 
-# Set the working directory
-WORKDIR /home/jupyter
+# Thêm người dùng vào nhóm sudo
+RUN adduser ${NB_USER} sudo
 
-# Start Jupyter Notebook as the default command
-CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--allow-root", "--no-browser"]
+# Thiết lập thư mục làm việc và quyền sở hữu
+RUN mkdir ${HOME}/work && \
+    chown -R ${NB_USER}:${NB_GID} ${HOME}
 
-# Switch to non-root user
-USER jupyter
+# Thiết lập Jupyter Notebook
+USER ${NB_USER}
+WORKDIR ${HOME}
+
+# Cấu hình Jupyter Notebook (tùy chọn)
+# Ví dụ: tạo config file, cài đặt extensions, ...
+
+# Khởi động Jupyter Notebook khi chạy container
+CMD ["jupyter", "notebook", "--ip", "0.0.0.0", "--port", "8888", "--allow-root"]
