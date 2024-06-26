@@ -1,20 +1,20 @@
-# Sử dụng image base là Ubuntu 20.04
-FROM ubuntu:20.04
+# Sử dụng image chính thức của Jupyter
+FROM jupyter/base-notebook
 
-# Cài đặt các gói cần thiết
-RUN apt-get update && apt-get install -y python3 python3-pip
+# Cài đặt JupyterLab
+RUN pip install jupyterlab
 
-# Cài đặt Jupyter Lab
-RUN pip3 install jupyterlab
+# Thiết lập JupyterLab không yêu cầu mật khẩu
+RUN mkdir -p ~/.jupyter && \
+    echo "c.NotebookApp.password = ''" > ~/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.token = '11042006'" >> ~/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.ip = '0.0.0.0'" >> ~/.jupyter/jupyter_notebook_config.py && \
+    echo "c.NotebookApp.open_browser = False" >> ~/.jupyter/jupyter_notebook_config.py
 
-# Tạo một user mới (ví dụ: myuser)
-RUN useradd -m myuser
+# Mở cổng 8888
+EXPOSE 8888
 
-# Thiết lập môi trường cho Jupyter Lab
-ENV JUPYTER_CONFIG_DIR=/home/myuser/.jupyter
+USER root
 
-# Thiết lập thư mục làm việc
-WORKDIR /home/myuser
-
-# Chạy Jupyter Lab khi khởi động container
-CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+# Lệnh chạy JupyterLab khi container khởi động
+CMD ["jupyter", "lab", "--allow-root"]
