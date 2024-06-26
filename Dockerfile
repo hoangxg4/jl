@@ -1,37 +1,20 @@
-FROM jupyter/base-notebook
+# Sử dụng image base là Ubuntu 20.04
+FROM ubuntu:20.04
 
 # Cài đặt các gói cần thiết
-USER root
-RUN apt-get update && apt-get install -y \
-    sudo \
-    vim \
-    nano
+RUN apt-get update && apt-get install -y python3 python3-pip
 
-# Tạo người dùng mới
-ARG NB_USER=jovyan
-ARG NB_UID=1000
-ENV USER ${NB_USER}
-ENV NB_GID ${NB_UID}
-ENV HOME /home/${NB_USER}
+# Cài đặt Jupyter Lab
+RUN pip3 install jupyterlab
 
-RUN useradd -m -s /bin/bash -N -u ${NB_UID} ${NB_USER}
+# Tạo một user mới (ví dụ: myuser)
+RUN useradd -m myuser
 
-# Thiết lập mật khẩu (lưu ý thay đổi 'yourpassword' bằng mật khẩu mạnh)
-RUN echo "${NB_USER}:yourpassword" | chpasswd
+# Thiết lập môi trường cho Jupyter Lab
+ENV JUPYTER_CONFIG_DIR=/home/myuser/.jupyter
 
-# Thêm người dùng vào nhóm sudo
-RUN adduser ${NB_USER} sudo
+# Thiết lập thư mục làm việc
+WORKDIR /home/myuser
 
-# Thiết lập thư mục làm việc và quyền sở hữu
-RUN mkdir ${HOME}/work && \
-    chown -R ${NB_USER}:${NB_GID} ${HOME}
-
-# Thiết lập Jupyter Notebook
-USER ${NB_USER}
-WORKDIR ${HOME}
-
-# Cấu hình Jupyter Notebook (tùy chọn)
-# Ví dụ: tạo config file, cài đặt extensions, ...
-
-# Khởi động Jupyter Notebook khi chạy container
-CMD ["jupyter", "notebook", "--ip", "0.0.0.0", "--port", "8888", "--allow-root"]
+# Chạy Jupyter Lab khi khởi động container
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
