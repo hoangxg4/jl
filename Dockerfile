@@ -1,24 +1,29 @@
-# Sử dụng hình ảnh cơ bản Python
-FROM python:3.9-slim
+FROM ubuntu:latest
 
-# Cài đặt sudo
-RUN apt-get update && apt-get install -y sudo
+# Cài đặt các gói cần thiết
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    sudo
 
-# Tạo người dùng mới không có quyền root
-RUN useradd -ms /bin/bash jupyter
+# Cài đặt Jupyter
+RUN pip3 install jupyter
 
-# Thêm người dùng mới vào nhóm sudo và cho phép sử dụng sudo mà không cần mật khẩu
-RUN usermod -aG sudo jupyter && echo "jupyter ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# Tạo người dùng non-root
+RUN useradd -m jupyteruser
+RUN echo "jupyteruser ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
-# Cài đặt JupyterLab
-RUN pip install jupyterlab
+# Cài đặt thư mục làm việc
+WORKDIR /home/jupyteruser
 
-# Tạo thư mục làm việc và chuyển quyền sở hữu thư mục cho người dùng không có quyền root
-WORKDIR /home/jupyter/workspace
-RUN chown -R jupyter:jupyter /home/jupyter
+# Chuyển quyền sở hữu thư mục cho người dùng non-root
+RUN chown -R jupyteruser:jupyteruser /home/jupyteruser
 
-# Đặt người dùng mặc định
-USER jupyter
+# Chuyển sang người dùng non-root
+USER jupyteruser
 
-# Khởi chạy JupyterLab
-CMD ["jupyter", "lab", "--ip=0.0.0.0", "--allow-root", "--no-browser", "--NotebookApp.token=''"]
+# Expose cổng mặc định của Jupyter
+EXPOSE 8888
+
+# Khởi chạy Jupyter Notebook
+CMD ["jupyter", "notebook", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
