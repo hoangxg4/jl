@@ -1,4 +1,4 @@
-FROM python:3.10  # Chọn phiên bản Python phù hợp
+FROM python:3.10 
 
 # Cài đặt JupyterLab và các thư viện cần thiết
 RUN pip install jupyterlab
