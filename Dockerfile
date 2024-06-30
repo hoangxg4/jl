@@ -1,30 +1,18 @@
-# Sử dụng image Ubuntu làm cơ sở
-FROM ubuntu:latest
+# Sử dụng image chính thức của Python làm image gốc
+FROM python:3.9
 
-# Cập nhật hệ thống và cài đặt các gói cần thiết
-RUN apt-get update && \
-    apt-get install -y \
-        nginx \
-        curl \
-        vim \
-        net-tools \
-        sudo \
-        openssh-server \
-    && rm -rf /var/lib/apt/lists/*
+# Cập nhật danh sách package và cài đặt pip
+RUN apt-get update && apt-get install -y \
+    python3-pip
 
-# Tạo người dùng mới và cấp quyền sudo
-RUN useradd -rm -d /home/vpsuser -s /bin/bash -g root -G sudo -u 1000 vpsuser
-RUN echo 'vpsuser:password' | chpasswd
+# Cài đặt JupyterLab
+RUN pip install jupyterlab
 
-# Cấu hình SSH
-RUN mkdir /home/vpsuser/.ssh
-RUN chmod 700 /home/vpsuser/.ssh
-RUN touch /home/vpsuser/.ssh/authorized_keys
-RUN chmod 600 /home/vpsuser/.ssh/authorized_keys
+# Tạo thư mục làm việc
+WORKDIR /workspace
 
-# Sao chép cấu hình SSH (tùy chọn)
-COPY sshd_config /etc/ssh/sshd_config
+# Mở cổng 8888 để truy cập JupyterLab
+EXPOSE 8888
 
-# Khởi động SSH
-EXPOSE 22
-CMD ["/usr/sbin/sshd", "-D"]
+# Khởi động JupyterLab khi container chạy và đặt token đăng nhập
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token='11042006'"]
