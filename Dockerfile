@@ -1,34 +1,30 @@
-FROM python:3.10
+# Sử dụng image Ubuntu làm cơ sở
+FROM ubuntu:latest
 
-# Cài đặt các gói cần thiết
+# Cập nhật hệ thống và cài đặt các gói cần thiết
 RUN apt-get update && \
     apt-get install -y \
-        sudo \
+        nginx \
+        curl \
         vim \
-        nano
+        net-tools \
+        sudo \
+        openssh-server \
+    && rm -rf /var/lib/apt/lists/*
 
-# Tạo user jovyan và thư mục làm việc, đặt quyền sở hữu
-RUN useradd -ms /bin/bash jovyan \
-    && mkdir -p /home/jovyan/work \
-    && chown -R jovyan:jovyan /home/jovyan/work
+# Tạo người dùng mới và cấp quyền sudo
+RUN useradd -rm -d /home/vpsuser -s /bin/bash -g root -G sudo -u 1000 vpsuser
+RUN echo 'vpsuser:password' | chpasswd
 
-# Cài đặt JupyterLab và các thư viện Python (dưới user jovyan)
-USER jovyan
-RUN pip install --user jupyterlab numpy pandas matplotlib
+# Cấu hình SSH
+RUN mkdir /home/vpsuser/.ssh
+RUN chmod 700 /home/vpsuser/.ssh
+RUN touch /home/vpsuser/.ssh/authorized_keys
+RUN chmod 600 /home/vpsuser/.ssh/authorized_keys
 
-# Tạo token đăng nhập tùy chỉnh
-RUN jupyter lab --generate-config
-RUN echo "c.ServerApp.token = '11042006'" >> /home/jovyan/.jupyter/jupyter_lab_config.py
-RUN echo "c.ServerApp.root_dir = '/home/jovyan/work'" >> /home/jovyan/.jupyter/jupyter_lab_config.py
+# Sao chép cấu hình SSH (tùy chọn)
+COPY sshd_config /etc/ssh/sshd_config
 
-# Thêm user jovyan vào nhóm sudo
-USER root
-RUN usermod -aG sudo jovyan
-
-# Mở cổng 8888
-EXPOSE 8888
-
-# Chạy JupyterLab dưới user jovyan
-USER jovyan
-WORKDIR /home/jovyan/work
-CMD ["jupyter", "lab", "--ip=0.0.0.0"]
+# Khởi động SSH
+EXPOSE 22
+CMD ["/usr/sbin/sshd", "-D"]
