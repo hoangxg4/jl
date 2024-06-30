@@ -7,11 +7,14 @@ RUN apt-get update && \
         vim \
         nano
 
-# Cài đặt JupyterLab và các thư viện Python
-RUN pip install jupyterlab numpy pandas matplotlib
+# Tạo user jovyan và thư mục làm việc, đặt quyền sở hữu
+RUN useradd -ms /bin/bash jovyan \
+    && mkdir -p /home/jovyan/work \
+    && chown -R jovyan:jovyan /home/jovyan/work
 
-# Tạo thư mục làm việc cho JupyterLab
-RUN mkdir /home/jovyan/work
+# Cài đặt JupyterLab và các thư viện Python (dưới user jovyan)
+USER jovyan
+RUN pip install --user jupyterlab numpy pandas matplotlib
 
 # Tạo token đăng nhập tùy chỉnh
 RUN jupyter lab --generate-config
@@ -19,6 +22,7 @@ RUN echo "c.ServerApp.token = '11042006'" >> /home/jovyan/.jupyter/jupyter_lab_c
 RUN echo "c.ServerApp.root_dir = '/home/jovyan/work'" >> /home/jovyan/.jupyter/jupyter_lab_config.py
 
 # Thêm user jovyan vào nhóm sudo
+USER root
 RUN usermod -aG sudo jovyan
 
 # Mở cổng 8888
