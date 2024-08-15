@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
 RUN pip install jupyterlab
 
 # Tạo thư mục làm việc
-WORKDIR /workspace
+WORKDIR /root
 
 # Mở cổng 8888 để truy cập JupyterLab
 EXPOSE 8888
