@@ -5,13 +5,18 @@ FROM ubuntu:latest
 RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
+    python3-venv \
     && apt-get clean
 
-# Cài đặt JupyterLab
-RUN pip3 install jupyterlab
+# Tạo môi trường ảo và cài đặt JupyterLab
+RUN python3 -m venv /opt/venv
+RUN /opt/venv/bin/pip install --upgrade pip && /opt/venv/bin/pip install jupyterlab
 
 # Tạo thư mục làm việc
 WORKDIR /root
+
+# Thêm đường dẫn môi trường ảo vào PATH
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Mở cổng 8888 cho JupyterLab
 EXPOSE 8888
