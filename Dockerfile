@@ -9,7 +9,7 @@ RUN apt-get update && apt-get install -y \
 
 # Tạo môi trường ảo và cài đặt JupyterLab
 RUN python3 -m pip config set global.break-system-packages true
-RUN pip install --upgrade pip && pip install jupyterlab
+RUN pip3 install jupyterlab
 
 # Tạo thư mục làm việc
 WORKDIR /root
