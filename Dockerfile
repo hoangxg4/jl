@@ -3,6 +3,7 @@ FROM ubuntu:latest
 
 # Cập nhật hệ thống và cài đặt các gói cần thiết
 RUN apt-get update && apt-get install -y \
+    sudo \
     python3 \
     python3-pip \
     && apt-get clean
