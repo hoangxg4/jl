@@ -1,5 +1,4 @@
-# Sử dụng Ubuntu làm base image
-FROM ubuntu:latest
+FROM python:3.12-bookworm
 
 # Cập nhật hệ thống và cài đặt các gói cần thiết
 RUN apt-get update && apt-get install -y \
