@@ -1,22 +1,21 @@
-FROM python:3.12-alpine
+FROM python:3.12-slim
 
-# Cài đặt các gói cần thiết để build và chạy JupyterLab
-RUN apk add --no-cache \
-    bash \
+# Cập nhật hệ thống và cài đặt các gói cần thiết
+RUN apt-get update && apt-get install -y \
     sudo \
-    build-base \
-    libffi-dev \
-    openssl-dev \
-    && pip install --no-cache-dir --upgrade pip \
-    && pip config set global.break-system-packages true \
-    && pip install --no-cache-dir jupyterlab \
-    && apk del build-base libffi-dev openssl-dev
+    python3 \
+    python3-pip \
+    && apt-get clean
 
-# Thư mục làm việc
+# Tạo môi trường ảo và cài đặt JupyterLab
+RUN python3 -m pip config set global.break-system-packages true
+RUN pip3 install jupyterlab
+
+# Tạo thư mục làm việc
 WORKDIR /root
 
-# Mở cổng 8888
+# Mở cổng 8888 cho JupyterLab
 EXPOSE 8888
 
-# Chạy JupyterLab (token cố định)
-CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token=11042006"]
+# Khởi động JupyterLab với quyền root và token
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root", "--NotebookApp.token='11042006'"]
